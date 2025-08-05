@@ -33,6 +33,7 @@ help:
 	@echo "  train-batch     - Batch training for multiple stocks"
 	@echo "  predict         - Make predictions for a stock"
 	@echo "  demo            - Run demo with sample data"
+	@echo "  demo-live       - Open live demo in browser"
 	@echo ""
 	@echo "🐳 Docker:"
 	@echo "  docker-build    - Build Docker image"
@@ -142,6 +143,13 @@ predict:
 demo:
 	@echo "🎬 Running demo..."
 	CUDA_VISIBLE_DEVICES=-1 $(PYTHON_VENV) examples/basic_usage.py || $(PYTHON_VENV) run_example.py
+
+demo-live:
+	@echo "🌟 Opening live demo in browser..."
+	@echo "🚀 Live Demo: https://stock-price-movement-prediction-system.streamlit.app/"
+	@command -v xdg-open >/dev/null 2>&1 && xdg-open "https://stock-price-movement-prediction-system.streamlit.app/" || \
+	command -v open >/dev/null 2>&1 && open "https://stock-price-movement-prediction-system.streamlit.app/" || \
+	echo "Please open https://stock-price-movement-prediction-system.streamlit.app/ in your browser"
 
 # Docker
 docker-build:

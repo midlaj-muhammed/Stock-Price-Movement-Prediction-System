@@ -131,6 +131,8 @@ networks:
 
 # Usage examples:
 #
+# 🌟 Try the live demo first: https://stock-price-movement-prediction-system.streamlit.app/
+#
 # 1. Basic web interface:
 #    docker-compose up stock-prediction-web
 #

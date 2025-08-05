@@ -4,8 +4,19 @@
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://tensorflow.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.x-red.svg)](https://streamlit.io)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Demo](https://img.shields.io/badge/Demo-Live%20App-brightgreen.svg)](https://stock-price-movement-prediction-system.streamlit.app/)
 
 A comprehensive machine learning system for predicting stock price movements using advanced deep learning models including LSTM and TCN architectures. The system features an intuitive web interface, supports 100+ stock symbols across multiple sectors, and provides real-time predictions with technical analysis.
+
+## 🌟 **Live Demo**
+
+**🚀 Try the live application:** [https://stock-price-movement-prediction-system.streamlit.app/](https://stock-price-movement-prediction-system.streamlit.app/)
+
+Experience the full functionality including:
+- 📊 Interactive stock selection from 100+ symbols
+- 🧠 Real-time model training and predictions
+- 📈 Advanced technical analysis and visualizations
+- 🎯 Performance metrics and evaluation
 
 ## 🚀 Features
 
@@ -94,7 +105,10 @@ docker-compose up --build
 
 ## 🎯 Quick Start
 
-### 1. Web Interface (Recommended)
+### 0. Try the Live Demo (Fastest)
+**🌟 No installation required!** Visit the live demo: [https://stock-price-movement-prediction-system.streamlit.app/](https://stock-price-movement-prediction-system.streamlit.app/)
+
+### 1. Web Interface (Local Setup)
 Launch the interactive web application:
 
 ```bash
@@ -368,6 +382,7 @@ This system is for educational and research purposes only. Stock market predicti
 
 ## 📞 Support
 
+- **🌟 Live Demo**: [https://stock-price-movement-prediction-system.streamlit.app/](https://stock-price-movement-prediction-system.streamlit.app/)
 - **Issues**: [GitHub Issues](https://github.com/midlaj-muhammed/Stock-Price-Movement-Prediction-System/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/midlaj-muhammed/Stock-Price-Movement-Prediction-System/discussions)
 - **Documentation**: [Wiki](https://github.com/midlaj-muhammed/Stock-Price-Movement-Prediction-System/wiki)
