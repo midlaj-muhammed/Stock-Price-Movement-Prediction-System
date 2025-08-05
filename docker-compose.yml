@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  # Main web application
+  stock-prediction-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: stock-prediction-web
+    ports:
+      - "8501:8501"
+    environment:
+      - CUDA_VISIBLE_DEVICES=-1
+      - TF_CPP_MIN_LOG_LEVEL=2
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+    volumes:
+      # Persist data and models
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+      # Optional: Mount config for customization
+      - ./config.yaml:/app/config.yaml:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - stock-prediction-network
+
+  # Training service (optional - for batch training)
+  stock-prediction-trainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: stock-prediction-trainer
+    environment:
+      - CUDA_VISIBLE_DEVICES=-1
+      - TF_CPP_MIN_LOG_LEVEL=2
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+    command: python fine_tune_simple.py
+    profiles:
+      - training
+    networks:
+      - stock-prediction-network
+
+  # Data collector service (optional - for scheduled data updates)
+  stock-prediction-data:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: stock-prediction-data
+    environment:
+      - CUDA_VISIBLE_DEVICES=-1
+      - TF_CPP_MIN_LOG_LEVEL=2
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    command: python -c "
+      from src.data.data_collector import StockDataCollector;
+      from src.data.stock_symbols import POPULAR_SYMBOLS;
+      import time;
+      collector = StockDataCollector();
+      while True:
+        for symbol in POPULAR_SYMBOLS[:10]:
+          try:
+            print(f'Updating data for {symbol}...');
+            collector.get_stock_data(symbol, period='1y', source='yahoo');
+          except Exception as e:
+            print(f'Error updating {symbol}: {e}');
+        print('Sleeping for 1 hour...');
+        time.sleep(3600);
+      "
+    profiles:
+      - data-collector
+    restart: unless-stopped
+    networks:
+      - stock-prediction-network
+
+  # Redis cache (optional - for improved performance)
+  redis:
+    image: redis:7-alpine
+    container_name: stock-prediction-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    profiles:
+      - cache
+    restart: unless-stopped
+    networks:
+      - stock-prediction-network
+
+  # Nginx reverse proxy (optional - for production deployment)
+  nginx:
+    image: nginx:alpine
+    container_name: stock-prediction-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - stock-prediction-web
+    profiles:
+      - production
+    restart: unless-stopped
+    networks:
+      - stock-prediction-network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  stock-prediction-network:
+    driver: bridge
+
+# Usage examples:
+#
+# 1. Basic web interface:
+#    docker-compose up stock-prediction-web
+#
+# 2. Web interface with cache:
+#    docker-compose --profile cache up
+#
+# 3. Full production setup:
+#    docker-compose --profile production --profile cache up
+#
+# 4. Training mode:
+#    docker-compose --profile training up stock-prediction-trainer
+#
+# 5. Data collection service:
+#    docker-compose --profile data-collector up stock-prediction-data
+#
+# 6. Development mode (all services):
+#    docker-compose --profile training --profile cache --profile data-collector up
+#
+# 7. Build and run:
+#    docker-compose up --build
+#
+# 8. Run in background:
+#    docker-compose up -d
+#
+# 9. Stop all services:
+#    docker-compose down
+#
+# 10. Clean up (remove volumes):
+#     docker-compose down -v

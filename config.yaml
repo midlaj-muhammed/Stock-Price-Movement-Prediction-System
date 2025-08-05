@@ -1,0 +1,88 @@
+# Stock Price Prediction System Configuration
+
+# Data Sources
+data_sources:
+  yahoo_finance:
+    enabled: true
+    period: "2y"  # 2 years of historical data
+    interval: "1d"  # daily data
+  
+  alpha_vantage:
+    enabled: true
+    api_key: "YOUR_ALPHA_VANTAGE_API_KEY"
+    function: "TIME_SERIES_DAILY"
+
+# Feature Engineering
+features:
+  technical_indicators:
+    - "SMA_5"    # Simple Moving Average 5 days
+    - "SMA_10"   # Simple Moving Average 10 days
+    - "SMA_20"   # Simple Moving Average 20 days
+    - "EMA_12"   # Exponential Moving Average 12 days
+    - "EMA_26"   # Exponential Moving Average 26 days
+    - "RSI_14"   # Relative Strength Index 14 days
+    - "MACD"     # Moving Average Convergence Divergence
+    - "BB_upper" # Bollinger Bands Upper
+    - "BB_lower" # Bollinger Bands Lower
+    - "ATR_14"   # Average True Range 14 days
+    - "Volume_SMA_10"  # Volume Simple Moving Average
+  
+  lookback_window: 10  # Number of days to look back for sequence models
+  prediction_horizon: 1  # Number of days to predict ahead
+
+# Model Configuration
+models:
+  lstm:
+    units: [128, 64, 32]
+    dropout: 0.2
+    recurrent_dropout: 0.2
+    batch_size: 32
+    epochs: 100
+    learning_rate: 0.001
+    patience: 10  # Early stopping patience
+  
+  tcn:
+    nb_filters: 64
+    kernel_size: 3
+    nb_stacks: 1
+    dilations: [1, 2, 4, 8, 16, 32]
+    dropout_rate: 0.05
+    batch_size: 32
+    epochs: 100
+    learning_rate: 0.001
+    patience: 10
+
+# Training Configuration
+training:
+  test_size: 0.2
+  validation_size: 0.2
+  random_state: 42
+  shuffle: false  # Important for time series data
+
+# Evaluation Metrics
+evaluation:
+  classification_metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1_score"
+    - "roc_auc"
+  
+  regression_metrics:
+    - "rmse"
+    - "mae"
+    - "mape"
+    - "r2_score"
+
+# Web Interface
+web_interface:
+  title: "Stock Price Movement Prediction System"
+  default_symbols: ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN"]
+  refresh_interval: 300  # seconds
+  max_symbols_per_request: 5
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/stock_prediction.log"

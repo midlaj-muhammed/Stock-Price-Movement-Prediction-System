@@ -1,0 +1,41 @@
+# Core Data Science Libraries
+numpy
+pandas
+scikit-learn
+
+# Deep Learning
+tensorflow
+keras
+
+# Data Visualization
+matplotlib
+seaborn
+plotly
+
+# Financial Data APIs
+yfinance
+alpha-vantage
+requests
+
+# Technical Analysis
+ta
+
+# Web Framework
+streamlit
+flask
+
+# Data Processing
+scipy
+joblib
+
+# Configuration and Environment
+python-dotenv
+pyyaml
+
+# Testing
+pytest
+pytest-cov
+
+# Utilities
+tqdm
+colorama

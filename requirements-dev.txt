@@ -1,0 +1,192 @@
+# Development Dependencies for Stock Price Movement Prediction System
+# Install with: pip install -r requirements-dev.txt
+
+# Include production requirements
+-r requirements.txt
+
+# =============================================================================
+# TESTING FRAMEWORKS
+# =============================================================================
+
+# Core testing framework
+pytest>=7.0.0
+pytest-cov>=4.0.0          # Coverage reporting
+pytest-xdist>=3.0.0        # Parallel test execution
+pytest-mock>=3.10.0        # Mocking utilities
+pytest-asyncio>=0.21.0     # Async testing support
+
+# Test data and fixtures
+pytest-factoryboy>=2.5.0   # Test data factories
+faker>=18.0.0               # Fake data generation
+
+# =============================================================================
+# CODE QUALITY & FORMATTING
+# =============================================================================
+
+# Code formatting
+black>=23.0.0               # Code formatter
+isort>=5.12.0               # Import sorting
+
+# Linting and static analysis
+flake8>=6.0.0               # Style guide enforcement
+flake8-docstrings>=1.7.0    # Docstring linting
+flake8-import-order>=0.18.2 # Import order checking
+flake8-bugbear>=23.0.0      # Additional bug detection
+
+# Type checking
+mypy>=1.0.0                 # Static type checker
+types-requests>=2.28.0      # Type stubs for requests
+types-PyYAML>=6.0.0         # Type stubs for PyYAML
+
+# Security scanning
+bandit>=1.7.0               # Security linter
+safety>=2.3.0               # Dependency vulnerability scanner
+
+# =============================================================================
+# DOCUMENTATION
+# =============================================================================
+
+# Documentation generation
+sphinx>=6.0.0              # Documentation generator
+sphinx-rtd-theme>=1.2.0    # Read the Docs theme
+sphinx-autodoc-typehints>=1.22.0  # Type hints in docs
+
+# Jupyter notebook support
+jupyter>=1.0.0             # Jupyter notebook
+ipykernel>=6.20.0          # Jupyter kernel
+nbconvert>=7.0.0           # Notebook conversion
+
+# =============================================================================
+# DEVELOPMENT TOOLS
+# =============================================================================
+
+# Code analysis and metrics
+radon>=6.0.0               # Code complexity analysis
+xenon>=0.9.0               # Code complexity monitoring
+vulture>=2.7.0             # Dead code detection
+
+# Performance profiling
+memory-profiler>=0.60.0    # Memory usage profiling
+line-profiler>=4.0.0       # Line-by-line profiling
+py-spy>=0.3.14             # Sampling profiler
+
+# Debugging
+ipdb>=0.13.0               # Enhanced debugger
+pdbpp>=0.10.3              # Enhanced pdb
+
+# =============================================================================
+# PRE-COMMIT HOOKS
+# =============================================================================
+
+# Pre-commit framework
+pre-commit>=3.0.0          # Git pre-commit hooks
+
+# =============================================================================
+# BUILD AND PACKAGING
+# =============================================================================
+
+# Build tools
+build>=0.10.0              # Build backend
+wheel>=0.40.0              # Wheel packaging
+twine>=4.0.0               # Package uploading
+
+# Version management
+bump2version>=1.0.0        # Version bumping
+
+# =============================================================================
+# ENVIRONMENT MANAGEMENT
+# =============================================================================
+
+# Environment file handling
+python-dotenv>=1.0.0       # .env file support
+
+# Configuration management
+dynaconf>=3.1.0            # Configuration management
+
+# =============================================================================
+# API DEVELOPMENT (Optional)
+# =============================================================================
+
+# API testing
+httpx>=0.24.0              # HTTP client for testing
+respx>=0.20.0              # HTTP mocking
+
+# API documentation
+fastapi>=0.95.0            # Fast API framework (if needed)
+uvicorn>=0.20.0            # ASGI server
+
+# =============================================================================
+# DATA SCIENCE DEVELOPMENT
+# =============================================================================
+
+# Enhanced data analysis
+jupyter-lab>=3.6.0         # JupyterLab interface
+seaborn>=0.12.0            # Statistical visualization
+plotly-dash>=2.10.0        # Interactive dashboards
+
+# Model experimentation
+mlflow>=2.3.0              # ML experiment tracking
+wandb>=0.15.0              # Weights & Biases (optional)
+
+# =============================================================================
+# CONTAINERIZATION
+# =============================================================================
+
+# Docker utilities
+docker>=6.0.0              # Docker Python API
+docker-compose>=1.29.0     # Docker Compose
+
+# =============================================================================
+# CI/CD TOOLS
+# =============================================================================
+
+# GitHub Actions utilities
+github3.py>=4.0.0          # GitHub API client
+
+# Coverage reporting
+codecov>=2.1.0             # Codecov integration
+
+# =============================================================================
+# DEVELOPMENT UTILITIES
+# =============================================================================
+
+# File watching
+watchdog>=3.0.0            # File system monitoring
+
+# Terminal enhancements
+rich>=13.0.0               # Rich terminal output
+click>=8.1.0               # Command line interface
+
+# Progress bars
+tqdm>=4.65.0               # Progress bars
+
+# =============================================================================
+# OPTIONAL DEVELOPMENT TOOLS
+# =============================================================================
+
+# Database development (uncomment if needed)
+# alembic>=1.10.0           # Database migrations
+# sqlalchemy>=2.0.0         # ORM
+
+# Redis development (uncomment if needed)
+# redis>=4.5.0              # Redis client
+# fakeredis>=2.10.0         # Redis mocking
+
+# =============================================================================
+# NOTES
+# =============================================================================
+
+# Installation:
+# pip install -r requirements-dev.txt
+
+# Or with Make:
+# make install-dev
+
+# Pre-commit setup:
+# pre-commit install
+
+# Run quality checks:
+# make check
+
+# Format code:
+# make format

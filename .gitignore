@@ -1,0 +1,453 @@
+# Stock Price Movement Prediction System - .gitignore
+# Comprehensive gitignore for Python ML project
+
+# =============================================================================
+# PYTHON
+# =============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# =============================================================================
+# MACHINE LEARNING & DATA SCIENCE
+# =============================================================================
+
+# Trained models
+*.h5
+*.hdf5
+*.keras
+*.pkl
+*.pickle
+*.joblib
+*.model
+*.pt
+*.pth
+*.onnx
+*.pb
+*.tflite
+
+# Model checkpoints
+checkpoints/
+*.ckpt
+*.ckpt.*
+
+# TensorFlow
+*.tfrecord
+*.tfrecords
+tf_logs/
+tensorboard_logs/
+logs/tensorboard/
+
+# PyTorch
+lightning_logs/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Weights & Biases
+wandb/
+
+# Jupyter notebook outputs
+*.ipynb
+
+# Data files
+*.csv
+*.tsv
+*.json
+*.jsonl
+*.parquet
+*.feather
+*.arrow
+*.xlsx
+*.xls
+*.h5
+*.hdf
+*.sqlite
+*.db
+
+# Large data directories
+data/raw/
+data/processed/
+data/external/
+data/interim/
+datasets/
+*.zip
+*.tar.gz
+*.tar.bz2
+
+# =============================================================================
+# STOCK PREDICTION SPECIFIC
+# =============================================================================
+
+# Stock data cache
+stock_data/
+cache/
+*.cache
+
+# Model artifacts
+models/saved/
+models/checkpoints/
+models/experiments/
+saved_models/
+
+# Prediction results
+predictions/
+results/
+outputs/
+
+# Configuration files with secrets
+config/production.yaml
+config/secrets.yaml
+.secrets
+
+# Log files
+logs/
+*.log
+*.log.*
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Backup files
+backups/
+*.bak
+*.backup
+
+# =============================================================================
+# DEVELOPMENT TOOLS
+# =============================================================================
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Vim
+*.swp
+*.swo
+*.swn
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# PyCharm
+.idea/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# =============================================================================
+# OPERATING SYSTEM
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# DOCKER
+# =============================================================================
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# =============================================================================
+# CLOUD & DEPLOYMENT
+# =============================================================================
+
+# AWS
+.aws/
+
+# Google Cloud
+.gcloud/
+*.json
+
+# Azure
+.azure/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Kubernetes
+*.kubeconfig
+
+# =============================================================================
+# MONITORING & LOGGING
+# =============================================================================
+
+# Prometheus
+prometheus_data/
+
+# Grafana
+grafana_data/
+
+# ELK Stack
+elasticsearch_data/
+logstash_data/
+kibana_data/
+
+# =============================================================================
+# SECURITY
+# =============================================================================
+
+# API keys and secrets
+.env.local
+.env.production
+.env.staging
+secrets.yaml
+secrets.json
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# =============================================================================
+# TESTING
+# =============================================================================
+
+# Test artifacts
+.coverage
+.pytest_cache/
+test-results/
+test-reports/
+
+# =============================================================================
+# DOCUMENTATION
+# =============================================================================
+
+# Sphinx
+docs/_build/
+docs/build/
+
+# =============================================================================
+# MISCELLANEOUS
+# =============================================================================
+
+# Compressed files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Lock files
+*.lock
+
+# =============================================================================
+# PROJECT SPECIFIC IGNORES
+# =============================================================================
+
+# Add project-specific files to ignore here
+# Example:
+# my_custom_config.yaml
+# local_experiments/
+
+# Test files (uncomment if you want to ignore test files)
+# test_*.py
+# *_test.py
+
+# Example notebooks (uncomment if you want to ignore example notebooks)
+# examples/*.ipynb
+# notebooks/*.ipynb
