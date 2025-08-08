@@ -51,36 +51,47 @@ class LSTMStockModel(BaseStockModel):
     
     def build_model(self, input_shape: Tuple, **kwargs) -> None:
         """
-        Build LSTM model architecture.
-        
+        Build enhanced LSTM model architecture for higher accuracy.
+
         Args:
             input_shape: Shape of input data (timesteps, features)
             **kwargs: Additional model parameters
         """
-        logger.info(f"Building LSTM model for {self.task_type} with input shape: {input_shape}")
-        
-        # Get model configuration
-        units = kwargs.get('units', self.model_config.get('units', [128, 64, 32]))
-        dropout = kwargs.get('dropout', self.model_config.get('dropout', 0.2))
-        recurrent_dropout = kwargs.get('recurrent_dropout', self.model_config.get('recurrent_dropout', 0.2))
-        learning_rate = kwargs.get('learning_rate', self.model_config.get('learning_rate', 0.001))
-        l2_reg = kwargs.get('l2_reg', 0.001)
-        
+        logger.info(f"Building enhanced LSTM model for {self.task_type} with input shape: {input_shape}")
+
+        # Get model configuration with enhanced defaults
+        units = kwargs.get('units', self.model_config.get('units', [256, 128, 64]))
+        dropout = kwargs.get('dropout', self.model_config.get('dropout', 0.3))
+        recurrent_dropout = kwargs.get('recurrent_dropout', self.model_config.get('recurrent_dropout', 0.3))
+        learning_rate = kwargs.get('learning_rate', self.model_config.get('learning_rate', 0.0005))
+        l2_reg = kwargs.get('l2_reg', 0.01)
+
         # Build sequential model
         model = Sequential()
-        
-        # First LSTM layer
-        model.add(LSTM(
-            units[0],
-            return_sequences=True if len(units) > 1 else False,
-            input_shape=input_shape,
-            dropout=dropout,
-            recurrent_dropout=recurrent_dropout,
-            kernel_regularizer=l2(l2_reg),
-            name='lstm_1'
-        ))
+
+        # First LSTM layer with bidirectional option
+        if len(units) > 1:
+            from tensorflow.keras.layers import Bidirectional
+            model.add(Bidirectional(LSTM(
+                units[0] // 2,  # Divide by 2 for bidirectional
+                return_sequences=True,
+                dropout=dropout,
+                recurrent_dropout=recurrent_dropout,
+                kernel_regularizer=l2(l2_reg),
+                name='lstm_1'
+            ), input_shape=input_shape))
+        else:
+            model.add(LSTM(
+                units[0],
+                return_sequences=False,
+                input_shape=input_shape,
+                dropout=dropout,
+                recurrent_dropout=recurrent_dropout,
+                kernel_regularizer=l2(l2_reg),
+                name='lstm_1'
+            ))
         model.add(BatchNormalization())
-        
+
         # Additional LSTM layers
         for i, unit in enumerate(units[1:], 2):
             return_sequences = i < len(units)  # Return sequences for all but last layer
@@ -93,10 +104,12 @@ class LSTMStockModel(BaseStockModel):
                 name=f'lstm_{i}'
             ))
             model.add(BatchNormalization())
-        
-        # Dense layers
-        model.add(Dense(64, activation='relu', kernel_regularizer=l2(l2_reg)))
+
+        # Enhanced dense layers with residual-like connections
+        model.add(Dense(128, activation='relu', kernel_regularizer=l2(l2_reg)))
         model.add(Dropout(dropout))
+        model.add(Dense(64, activation='relu', kernel_regularizer=l2(l2_reg)))
+        model.add(Dropout(dropout * 0.5))  # Reduced dropout for deeper layers
         model.add(Dense(32, activation='relu', kernel_regularizer=l2(l2_reg)))
         model.add(Dropout(dropout))
         

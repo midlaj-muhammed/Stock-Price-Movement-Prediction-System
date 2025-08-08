@@ -142,6 +142,16 @@ python src/main.py --symbol AAPL --mode predict
 python fine_tune_simple.py
 ```
 
+#### Advanced Fine-tuning to 80% Accuracy
+```bash
+python fine_tune_to_80_percent.py
+```
+
+Or use the quick runner:
+```bash
+python run_fine_tuning.py
+```
+
 ### 3. Interactive Stock Selection
 ```bash
 python stock_selector.py
@@ -223,7 +233,7 @@ predictions = pipeline.predict_latest("lstm")
 
 ## 📊 Available Stock Symbols
 
-The system includes 100+ carefully selected stocks across major sectors:
+The system includes 100+ carefully selected stocks across major sectors and markets:
 
 ### 🌟 Popular Stocks (Top 20)
 AAPL, MSFT, GOOGL, AMZN, TSLA, META, NVDA, NFLX, JPM, JNJ, UNH, PG, HD, BAC, DIS, ADBE, CRM, V, MA, WMT
@@ -236,6 +246,17 @@ AAPL, MSFT, GOOGL, AMZN, TSLA, META, NVDA, NFLX, JPM, JNJ, UNH, PG, HD, BAC, DIS
 - **Energy (10)**: XOM, CVX, COP, EOG, etc.
 - **Industrial (10)**: BA, CAT, GE, MMM, etc.
 - **Real Estate (10)**: AMT, PLD, CCI, EQIX, etc.
+
+### 🌍 Supported Markets & Symbol Formats
+- **United States (NYSE/NASDAQ)**: Standard symbols, e.g., AAPL, MSFT, TSLA
+- **India (NSE/BSE)**: Use market suffixes:
+  - NSE: RELIANCE.NS, TCS.NS, INFY.NS, HDFCBANK.NS
+  - BSE: RELIANCE.BO, TCS.BO, INFY.BO, HDFCBANK.BO
+- Tip: If a symbol without suffix doesn’t load, try appending .NS (NSE) or .BO (BSE)
+
+Currency display:
+- **USD ($)** for US stocks
+- **INR (₹)** for Indian stocks (NSE/BSE)
 
 ### ⚡ Special Categories
 - **High Volatility**: TSLA, NVDA, AMD, NFLX, ZOOM, etc.

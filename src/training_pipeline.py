@@ -176,6 +176,36 @@ class StockPredictionPipeline:
             X_selected, selected_features, scaler_type="minmax", fit_scaler=True
         )
 
+        # Validate scaled data
+        logger.info("Validating scaled training data...")
+
+        # Check for infinite values in scaled features
+        inf_mask = np.isinf(X_scaled).any(axis=1)
+        if inf_mask.any():
+            logger.warning(f"Found {inf_mask.sum()} rows with infinite values in scaled features")
+            X_scaled = X_scaled[~inf_mask]
+            y = y[~inf_mask]
+
+        # Check for NaN values in scaled features
+        nan_mask = X_scaled.isna().any(axis=1)
+        if nan_mask.any():
+            logger.warning(f"Found {nan_mask.sum()} rows with NaN values in scaled features")
+            X_scaled = X_scaled[~nan_mask]
+            y = y[~nan_mask]
+
+        # Check for NaN values in target
+        target_nan_mask = y.isna()
+        if target_nan_mask.any():
+            logger.warning(f"Found {target_nan_mask.sum()} NaN values in target")
+            X_scaled = X_scaled[~target_nan_mask]
+            y = y[~target_nan_mask]
+
+        # Final validation
+        if len(X_scaled) == 0:
+            raise ValueError("No valid training data remaining after validation")
+
+        logger.info(f"Data validation completed. Features shape: {X_scaled.shape}, Target shape: {y.shape}")
+
         # Combine scaled features with targets for sequence creation
         combined_data = X_scaled.copy()
         combined_data[target_column] = y.values

@@ -123,6 +123,35 @@ TOP_STOCKS = {
         "DLR": "Digital Realty Trust",
         "PSA": "Public Storage",
         "EXR": "Extended Stay America"
+    },
+
+    "India (NSE/BSE)": {
+        "RELIANCE.NS": "Reliance Industries Limited",
+        "TCS.NS": "Tata Consultancy Services Limited",
+        "INFY.NS": "Infosys Limited",
+        "HDFCBANK.NS": "HDFC Bank Limited",
+        "ICICIBANK.NS": "ICICI Bank Limited",
+        "KOTAKBANK.NS": "Kotak Mahindra Bank Limited",
+        "SBIN.NS": "State Bank of India",
+        "HINDUNILVR.NS": "Hindustan Unilever Limited",
+        "ITC.NS": "ITC Limited",
+        "LT.NS": "Larsen & Toubro Limited",
+        "ASIANPAINT.NS": "Asian Paints Limited",
+        "MARUTI.NS": "Maruti Suzuki India Limited",
+        "AXISBANK.NS": "Axis Bank Limited",
+        "WIPRO.NS": "Wipro Limited",
+        "TECHM.NS": "Tech Mahindra Limited",
+        "ULTRACEMCO.NS": "UltraTech Cement Limited",
+        "SUNPHARMA.NS": "Sun Pharmaceutical Industries Limited",
+        "NESTLEIND.NS": "Nestlé India Limited",
+        "TATAMOTORS.NS": "Tata Motors Limited",
+        "TATASTEEL.NS": "Tata Steel Limited",
+        "ADANIENT.NS": "Adani Enterprises Limited",
+        "HDFCLIFE.NS": "HDFC Life Insurance Company Limited",
+        "RELIANCE.BO": "Reliance Industries Limited (BSE)",
+        "TCS.BO": "Tata Consultancy Services Limited (BSE)",
+        "INFY.BO": "Infosys Limited (BSE)",
+        "HDFCBANK.BO": "HDFC Bank Limited (BSE)"
     }
 }
 
@@ -133,10 +162,13 @@ for category, stocks in TOP_STOCKS.items():
 
 # Most popular symbols (top 20)
 POPULAR_SYMBOLS = [
-    "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", 
+    # US
+    "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA",
     "META", "NVDA", "NFLX", "JPM", "JNJ",
     "UNH", "PG", "HD", "BAC", "DIS",
-    "ADBE", "CRM", "V", "MA", "WMT"
+    "ADBE", "CRM", "V", "MA", "WMT",
+    # India (NSE)
+    "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS"
 ]
 
 # Volatile/High-Growth symbols for active trading
@@ -168,20 +200,33 @@ def get_category(symbol: str) -> str:
     return "Unknown"
 
 def search_stocks(query: str) -> list:
-    """Search for stocks by symbol or company name."""
-    query = query.lower()
+    """Search for stocks by symbol or company name.
+    Includes support for Indian markets with .NS (NSE) and .BO (BSE) suffixes.
+    """
+    query = query.lower().strip()
     results = []
-    
+
+    # 1) Search internal database
     for category, stocks in TOP_STOCKS.items():
         for symbol, name in stocks.items():
-            if (query in symbol.lower() or 
-                query in name.lower()):
-                results.append({
-                    'symbol': symbol,
-                    'name': name,
-                    'category': category
-                })
-    
+            if (query in symbol.lower() or query in name.lower()):
+                results.append({'symbol': symbol, 'name': name, 'category': category})
+
+    # 2) If no results and query looks like an Indian symbol without suffix, try adding .NS/.BO
+    def _add_if_valid(sym: str, label: str):
+        if sym not in [r['symbol'] for r in results]:
+            results.append({'symbol': sym, 'name': f"Custom ({label})", 'category': 'Unknown'})
+
+    if not results:
+        # Symbol-like queries without market suffix
+        if query.isalpha() or ('.' in query and query.endswith(('.ns', '.bo'))):
+            base = query.replace('.ns', '').replace('.bo', '').upper()
+            if not query.endswith(('.ns', '.bo')):
+                _add_if_valid(f"{base}.NS", "NSE candidate")
+                _add_if_valid(f"{base}.BO", "BSE candidate")
+            else:
+                _add_if_valid(base.upper(), "Exact candidate")
+
     return results
 
 def get_symbols_by_category(category: str) -> dict:
