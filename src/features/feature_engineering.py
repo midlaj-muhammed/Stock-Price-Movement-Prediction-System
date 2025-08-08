@@ -402,7 +402,7 @@ class FeatureEngineer:
 
     def transform_new_data(self, data: pd.DataFrame) -> pd.DataFrame:
         """
-        Transform new data using fitted transformers.
+        Transform new data using fitted transformers with adaptive handling for limited data.
 
         Args:
             data: New data to transform
@@ -410,8 +410,20 @@ class FeatureEngineer:
         Returns:
             Transformed data
         """
-        # Apply feature engineering
-        df = self.engineer_features(data)
+        logger.info(f"Transforming new data with {len(data)} records")
+
+        # Check if we have enough data for feature engineering
+        if len(data) < 50:
+            logger.warning(f"Limited data for feature engineering: {len(data)} records")
+
+        # Apply feature engineering with error handling
+        try:
+            df = self.engineer_features(data)
+        except Exception as e:
+            logger.error(f"Feature engineering failed: {e}")
+            # Fallback to basic features only
+            df = self._add_basic_features(data.copy())
+            df = self._clean_features(df)
 
         # Select features if selector is fitted
         if self.feature_selector is not None and self.selected_features:
@@ -419,7 +431,56 @@ class FeatureEngineer:
             missing_features = set(self.selected_features) - set(df.columns)
             if missing_features:
                 logger.warning(f"Missing selected features: {missing_features}")
+                # Add missing features with appropriate default values
+                for feature in missing_features:
+                    if 'ma' in feature.lower() or 'sma' in feature.lower() or 'ema' in feature.lower():
+                        # Moving average features - use close price as fallback
+                        df[feature] = df['close'] if 'close' in df.columns else 0
+                    elif 'rsi' in feature.lower():
+                        # RSI features - use neutral value
+                        df[feature] = 50
+                    elif 'volume' in feature.lower():
+                        # Volume features - use median volume or zero
+                        df[feature] = df['volume'].median() if 'volume' in df.columns else 0
+                    elif 'volatility' in feature.lower() or 'vol' in feature.lower():
+                        # Volatility features - use small positive value
+                        df[feature] = 0.01
+                    else:
+                        # Default to zero for other features
+                        df[feature] = 0
 
+                logger.info(f"Added {len(missing_features)} missing features with default values")
+
+        logger.info(f"Transformation completed. Output shape: {df.shape}")
+        return df
+
+    def _add_basic_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Add basic features when advanced feature engineering fails."""
+        logger.info("Adding basic features as fallback")
+
+        # Basic price features
+        df['returns'] = df['close'].pct_change()
+        df['price_change'] = df['close'] - df['open']
+        df['price_range'] = df['high'] - df['low']
+
+        # Basic moving averages (shorter periods for limited data)
+        for period in [3, 5, 10]:
+            if len(df) >= period:
+                df[f'sma_{period}'] = df['close'].rolling(period).mean()
+                df[f'volume_sma_{period}'] = df['volume'].rolling(period).mean()
+
+        # Basic volatility
+        if len(df) >= 5:
+            df['volatility_5'] = df['returns'].rolling(5).std()
+
+        # Basic momentum
+        if len(df) >= 3:
+            df['momentum_3'] = df['close'] / df['close'].shift(3) - 1
+
+        # Fill NaN values
+        df = df.fillna(method='ffill').fillna(method='bfill').fillna(0)
+
+        logger.info(f"Added basic features. Shape: {df.shape}")
         return df
 
     def _add_advanced_features(self, df: pd.DataFrame) -> pd.DataFrame:

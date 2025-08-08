@@ -156,37 +156,56 @@ class StockDataPreprocessor:
         lookback_window: Optional[int] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Create sequences for time series models.
-        
+        Create sequences for time series models with adaptive lookback window.
+
         Args:
             data: DataFrame with features and targets
             feature_columns: List of feature column names
             target_columns: List of target column names
             lookback_window: Number of time steps to look back
-            
+
         Returns:
             Tuple of (X, y) arrays for model training
         """
         if lookback_window is None:
             lookback_window = self.lookback_window
-        
+
+        # Adaptive lookback window based on available data
+        max_possible_lookback = len(data) - 1
+        if lookback_window > max_possible_lookback:
+            original_lookback = lookback_window
+            lookback_window = max(1, max_possible_lookback)
+            logger.warning(f"Reduced lookback window from {original_lookback} to {lookback_window} due to limited data")
+
         logger.info(f"Creating sequences with lookback window of {lookback_window}")
-        
+
         # Extract features and targets
         features = data[feature_columns].values
         targets = data[target_columns].values
-        
+
         X, y = [], []
-        
+
         for i in range(lookback_window, len(data)):
             # Features: lookback_window time steps
             X.append(features[i-lookback_window:i])
             # Target: current time step
             y.append(targets[i])
-        
+
+        # If no sequences can be created, create at least one with available data
+        if len(X) == 0 and len(data) > 0:
+            logger.warning("No sequences created with standard method, using fallback")
+            # Use all available data as a single sequence
+            if len(data) >= 2:
+                X.append(features[:-1])  # All but last row as features
+                y.append(targets[-1])    # Last row as target
+            else:
+                # Single data point - duplicate it
+                X.append(features)
+                y.append(targets[0])
+
         X = np.array(X)
         y = np.array(y)
-        
+
         logger.info(f"Created {len(X)} sequences with shape X: {X.shape}, y: {y.shape}")
         return X, y
     

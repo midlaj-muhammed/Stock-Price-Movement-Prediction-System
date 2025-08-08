@@ -471,22 +471,42 @@ def make_predictions(symbol, task_type, selected_models):
 
         # Process latest data through pipeline with robust error handling
         try:
-            # Get more data for prediction (use 6 months for better feature engineering)
-            latest_data = collector.get_stock_data(symbol, period="6mo", source="yahoo")
+            # Get more data for prediction (use 1 year for better feature engineering)
+            latest_data = collector.get_stock_data(symbol, period="1y", source="yahoo")
 
-            if latest_data is None or len(latest_data) < 50:
-                st.error(f"Insufficient recent data for prediction. Need at least 50 records, got {len(latest_data) if latest_data is not None else 0}")
-                return
+            if latest_data is None or len(latest_data) < 100:
+                st.warning(f"Limited recent data available: {len(latest_data) if latest_data is not None else 0} records")
+                # Try with 6 months if 1 year fails
+                latest_data = collector.get_stock_data(symbol, period="6mo", source="yahoo")
+
+                if latest_data is None or len(latest_data) < 50:
+                    st.error(f"Insufficient recent data for prediction. Need at least 50 records, got {len(latest_data) if latest_data is not None else 0}")
+                    return
 
             # Process data through feature engineering
             processed_data = pipeline.feature_engineer.transform_new_data(latest_data)
 
-            # Check if we have enough processed data
-            min_required = max(pipeline.preprocessor.lookback_window + 5, 30)
+            # Adaptive minimum requirements based on available data
+            lookback_window = getattr(pipeline.preprocessor, 'lookback_window', 10)
+            min_required = max(lookback_window + 2, 15)  # Reduced from 30 to 15
+
             if len(processed_data) < min_required:
-                st.error(f"Insufficient processed data for prediction. Need at least {min_required} records, got {len(processed_data)}")
-                st.info("💡 Try training with more historical data or use a different stock symbol.")
-                return
+                # Try with reduced lookback window
+                if hasattr(pipeline.preprocessor, 'lookback_window'):
+                    original_lookback = pipeline.preprocessor.lookback_window
+                    pipeline.preprocessor.lookback_window = min(5, len(processed_data) - 2)
+                    min_required = max(pipeline.preprocessor.lookback_window + 2, 10)
+
+                    if len(processed_data) >= min_required:
+                        st.warning(f"Using reduced lookback window ({pipeline.preprocessor.lookback_window}) due to limited data")
+                    else:
+                        st.error(f"Insufficient processed data for prediction. Need at least {min_required} records, got {len(processed_data)}")
+                        st.info("💡 Try training with more historical data or use a different stock symbol.")
+                        return
+                else:
+                    st.error(f"Insufficient processed data for prediction. Need at least {min_required} records, got {len(processed_data)}")
+                    st.info("💡 Try training with more historical data or use a different stock symbol.")
+                    return
 
             # Get feature columns from the trained model
             if hasattr(pipeline.feature_engineer, 'selected_features') and pipeline.feature_engineer.selected_features:
