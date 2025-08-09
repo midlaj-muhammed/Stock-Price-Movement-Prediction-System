@@ -648,7 +648,7 @@ def make_predictions(symbol, task_type, selected_models, classification_threshol
                             if task_type == "classification":
                                 direction = "📈 UP" if pred >= classification_threshold else "📉 DOWN"
                                 confidence = max(pred, 1-pred) * 100
-                                color = "#28a745" if pred > 0.5 else "#dc3545"
+                                color = "#28a745" if pred >= classification_threshold else "#dc3545"
 
                                 st.markdown(f"""
                                 <div style="background: linear-gradient(135deg, {color}20, {color}10);
@@ -709,18 +709,24 @@ def make_predictions(symbol, task_type, selected_models, classification_threshol
                             st.markdown("### 📈 Decision Metrics")
 
                             if task_type == "classification":
-                                # Classification decision metrics
-                                agreement = len([p for p in predictions.values() if (p > 0.5) == (ensemble_pred > 0.5)]) / len(predictions)
-                                volatility = np.std(list(predictions.values()))
+                                # Classification decision metrics (threshold-aware)
+                                model_probs = list(predictions.values())
+                                count_up = sum(1 for p in model_probs if p >= classification_threshold)
+                                count_down = len(model_probs) - count_up
+                                agreement = max(count_up, count_down) / len(model_probs)
+                                volatility = float(np.std(model_probs))  # probability std (0-1)
+                                # Normalize distance from threshold to [0,1]
+                                norm = max(classification_threshold, 1 - classification_threshold)
+                                signal_strength = abs(ensemble_pred - classification_threshold) / max(norm, 1e-6)
 
                                 st.metric("Model Agreement", f"{agreement*100:.1f}%")
                                 st.metric("Prediction Volatility", f"{volatility:.3f}")
-                                st.metric("Signal Strength", f"{abs(ensemble_pred - 0.5)*2:.1%}")
+                                st.metric("Signal Strength", f"{signal_strength*100:.1f}%")
 
-                                # Risk assessment
-                                if ensemble_confidence > 80:
+                                # Risk assessment combines agreement, strength and low volatility
+                                if agreement >= 0.80 and signal_strength >= 0.30 and volatility <= 0.08:
                                     risk_level = "🟢 Low Risk"
-                                elif ensemble_confidence > 60:
+                                elif agreement >= 0.60 and signal_strength >= 0.15 and volatility <= 0.15:
                                     risk_level = "🟡 Medium Risk"
                                 else:
                                     risk_level = "🔴 High Risk"
@@ -752,32 +758,55 @@ def make_predictions(symbol, task_type, selected_models, classification_threshol
                     # Generate recommendation based on predictions
                     if task_type == "classification":
                         if len(predictions) > 1:
-                            confidence = ensemble_confidence
-                            direction = ensemble_direction
+                            # Use risk level + direction to shape recommendation
                             pred_value = ensemble_pred
+                            direction = ensemble_direction
+                            # risk_level computed above in decision metrics block
+                            confidence = ensemble_confidence
                         else:
                             pred_value = list(predictions.values())[0]
                             confidence = max(pred_value, 1-pred_value) * 100
-                            direction = "📈 UP" if pred_value > 0.5 else "📉 DOWN"
+                            direction = "📈 UP" if pred_value >= classification_threshold else "📉 DOWN"
 
                         # Generate recommendation
-                        if confidence > 80:
-                            if pred_value > 0.5:
-                                recommendation = "🟢 **STRONG BUY** - High confidence upward movement predicted"
-                                action = "Consider buying or increasing position"
+                        # Map risk + direction to recommendation
+                        if 'risk_level' in locals():
+                            if risk_level.startswith("🟢"):
+                                if direction == "📈 UP":
+                                    recommendation = "🟢 **STRONG BUY** - High confidence upward movement predicted"
+                                    action = "Consider buying or increasing position"
+                                else:
+                                    recommendation = "🔴 **STRONG SELL** - High confidence downward movement predicted"
+                                    action = "Consider selling or reducing position"
+                            elif risk_level.startswith("🟡"):
+                                if direction == "📈 UP":
+                                    recommendation = "🟡 **MODERATE BUY** - Moderate confidence upward movement"
+                                    action = "Consider small position or wait for confirmation"
+                                else:
+                                    recommendation = "🟡 **MODERATE SELL** - Moderate confidence downward movement"
+                                    action = "Consider reducing position or wait for confirmation"
                             else:
-                                recommendation = "🔴 **STRONG SELL** - High confidence downward movement predicted"
-                                action = "Consider selling or reducing position"
-                        elif confidence > 60:
-                            if pred_value > 0.5:
-                                recommendation = "🟡 **MODERATE BUY** - Moderate confidence upward movement"
-                                action = "Consider small position or wait for confirmation"
-                            else:
-                                recommendation = "🟡 **MODERATE SELL** - Moderate confidence downward movement"
-                                action = "Consider reducing position or wait for confirmation"
+                                recommendation = "⚪ **HOLD** - High uncertainty or disagreement"
+                                action = "Wait for clearer signals before making decisions"
                         else:
-                            recommendation = "⚪ **HOLD** - Low confidence, unclear direction"
-                            action = "Wait for clearer signals before making decisions"
+                            # Fallback if risk_level is not computed (single-model case)
+                            if confidence > 80:
+                                if direction == "📈 UP":
+                                    recommendation = "🟢 **STRONG BUY**"
+                                    action = "Consider buying or increasing position"
+                                else:
+                                    recommendation = "🔴 **STRONG SELL**"
+                                    action = "Consider selling or reducing position"
+                            elif confidence > 60:
+                                if direction == "📈 UP":
+                                    recommendation = "🟡 **MODERATE BUY**"
+                                    action = "Consider small position or wait for confirmation"
+                                else:
+                                    recommendation = "🟡 **MODERATE SELL**"
+                                    action = "Consider reducing position or wait for confirmation"
+                            else:
+                                recommendation = "⚪ **HOLD** - Low confidence"
+                                action = "Wait for clearer signals before making decisions"
 
                     else:  # Regression
                         if len(predictions) > 1:
