@@ -232,6 +232,25 @@ def main():
         )
         task_type = "classification" if "Classification" in task_type else "regression"
 
+        # Classification-specific settings
+        classification_threshold = 0.5
+        require_agreement = False
+        if task_type == "classification":
+            st.subheader("🎚️ Classification Settings")
+            classification_threshold = st.slider(
+                "Classification Threshold",
+                min_value=0.50,
+                max_value=0.90,
+                value=0.50,
+                step=0.01,
+                help="Probability required to predict UP. Lower values are more sensitive; higher values reduce false positives."
+            )
+            require_agreement = st.checkbox(
+                "Only signal when models agree",
+                value=False,
+                help="When enabled, Buy/Sell signals are emitted only if all selected models agree on the direction. Otherwise, the app recommends HOLD."
+            )
+
         # Data collection parameters
         st.subheader("📊 Data Parameters")
         period = st.selectbox(
@@ -306,12 +325,14 @@ def main():
         st.info(f"**Task:** {task_type.title()}")
         st.info(f"**Period:** {period}")
         st.info(f"**Models:** {', '.join(selected_models)}")
+        if task_type == "classification":
+            st.info(f"**Threshold:** {classification_threshold:.2f}")
 
     # Main content based on button clicks
     if train_button:
         train_models(symbol, task_type, period, source, selected_models, n_features, epochs, batch_size)
     elif predict_button:
-        make_predictions(symbol, task_type, selected_models)
+        make_predictions(symbol, task_type, selected_models, classification_threshold, require_agreement)
     elif analyze_button:
         analyze_performance(symbol, task_type)
     else:
@@ -416,7 +437,7 @@ def train_models(symbol, task_type, period, source, selected_models, n_features,
         st.error(f"Training failed: {str(e)}")
         logger.error(f"Training failed for {symbol}: {e}")
 
-def make_predictions(symbol, task_type, selected_models):
+def make_predictions(symbol, task_type, selected_models, classification_threshold=0.5, require_agreement=False):
     """Make predictions with trained models."""
 
     st.header("🔮 Model Predictions")
@@ -592,11 +613,28 @@ def make_predictions(symbol, task_type, selected_models):
                 if predictions:
                     st.subheader("🎯 Prediction Results & Decision Support")
 
+                    # Calculate per-model classes for disagreement handling (classification)
+                    model_classes = None
+                    if task_type == "classification":
+                        model_classes = {
+                            name: ("UP" if prob >= classification_threshold else "DOWN")
+                            for name, prob in predictions.items()
+                        }
+
+                    # Agreement gating for classification
+                    if task_type == "classification" and require_agreement and len(predictions) > 1:
+                        if len(set(model_classes.values())) > 1:
+                            st.markdown("---")
+                            st.subheader("🤝 Agreement Required")
+                            st.warning("Models disagree on direction. Since 'Only signal when models agree' is enabled, recommendation is: HOLD")
+                            # Still show individual model cards above; skip ensemble/recommendation
+                            return
+
                     # Calculate ensemble prediction
                     if len(predictions) > 1:
                         if task_type == "classification":
                             ensemble_pred = np.mean(list(predictions.values()))
-                            ensemble_direction = "📈 UP" if ensemble_pred > 0.5 else "📉 DOWN"
+                            ensemble_direction = "📈 UP" if ensemble_pred >= classification_threshold else "📉 DOWN"
                             ensemble_confidence = max(ensemble_pred, 1-ensemble_pred) * 100
                         else:
                             ensemble_pred = np.mean(list(predictions.values()))
@@ -608,7 +646,7 @@ def make_predictions(symbol, task_type, selected_models):
                     for i, (model_name, pred) in enumerate(predictions.items()):
                         with cols[i]:
                             if task_type == "classification":
-                                direction = "📈 UP" if pred > 0.5 else "📉 DOWN"
+                                direction = "📈 UP" if pred >= classification_threshold else "📉 DOWN"
                                 confidence = max(pred, 1-pred) * 100
                                 color = "#28a745" if pred > 0.5 else "#dc3545"
 
